@@ -1,6 +1,6 @@
-SRC = ttytimer.c
+SRC = cli-timer.c
 CC ?= gcc
-BIN = ttytimer
+BIN = cli-timer
 PREFIX ?= /usr/local
 INSTALLPATH = ${DESTDIR}${PREFIX}/bin
 
@@ -15,11 +15,11 @@ else
 	LDFLAGS += $$(pkg-config --libs ncurses)
 endif
 
-ttytimer : ${SRC}
+cli-timer: ${SRC}
 	@echo "building ${SRC}"
 	${CC} ${CFLAGS} ${SRC} -o ${BIN} ${LDFLAGS}
 
-install : ${BIN}
+install: ${BIN}
 	@echo "installing binary file to ${INSTALLPATH}/${BIN}"
 	@mkdir -p ${INSTALLPATH}
 	@cp ${BIN} ${INSTALLPATH}

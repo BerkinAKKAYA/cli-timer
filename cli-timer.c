@@ -1,5 +1,5 @@
 #include <ctype.h>
-#include "ttytimer.h"
+#include "cli-timer.h"
 
 static bool time_is_zero(void) {
 	return ttyclock->date.hour[0]   == 0
