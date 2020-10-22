@@ -59,10 +59,14 @@ void init(void) {
 	}
 
 	/* Create the date win */
-	ttyclock->datewin = newwin(DATEWINH, strlen(ttyclock->date.timestr) + 2,
-								ttyclock->geo.x + ttyclock->geo.h - 1,
-								ttyclock->geo.y + (ttyclock->geo.w / 2) -
-								(strlen(ttyclock->date.timestr) / 2) - 1);
+	int beginY = ttyclock->geo.x + ttyclock->geo.h - 1;
+	int beginX = ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.timestr) / 2) - 1;
+	ttyclock->datewin = newwin(
+		DATEWINH,
+		strlen(ttyclock->date.timestr) + 2,
+		beginY,
+		beginX
+	);
 
 	clearok(ttyclock->datewin, True);
 	set_center();
