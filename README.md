@@ -43,5 +43,5 @@ make install
 
 ## TODO
 
-1. Option to count up rather than just down.
-2. Man page - including detailed description of time format.
+`cli-timer 25` should be 25 seconds,
+`cli-timer 25:00` should be 25 minutes and etc.
