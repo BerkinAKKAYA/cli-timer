@@ -1,8 +1,11 @@
-# ttytimer
+# cli-timer
 
-tty-stopwatch is a fork of ttytimer by mbarbar, which is a
-fork of the tty-clock by xorg62. I added start/stop feature
+cli-timer is a fork of [ttytimer by mbarbar][ttytimer], which is a
+fork of the [tty-clock by xorg62][tty-clock]. I added start/stop feature
 and removed the code i don't personally need.
+
+[ttytimer]: https://github.com/mbarbar/ttytimer
+[tty-clock]: https://github.com/xorg62/tty-clock
 
 ## Usage
 
