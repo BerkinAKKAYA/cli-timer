@@ -10,18 +10,6 @@ static bool time_is_zero(void) {
                && ttyclock->date.second[1] == 0;
 }
 
-/* Prints usage message and exits with exit code exit_code. */
-static void usage(char *argv0, int exit_code) {
-        printf("usage : %s [-xbvih] [-C color] hh:mm:ss\n"
-               "        -C color      Set the clock color\n"
-               "                      | black  | red   | green   |\n"
-               "                      | yellow | blue  | magenta |\n"
-               "                      | cyan   | white |\n"
-               "        -v            Show ttytimer version\n"
-               "        -h            Show this page\n", argv0);
-        exit(exit_code);
-}
-
 void init(void) {
         struct sigaction sig;
         ttyclock->bg = COLOR_BLACK;
@@ -113,7 +101,6 @@ void cleanup(void) {
         if (ttyclock) free(ttyclock);
 }
 
-/* Decrements ttyclock's time by 1 second. */
 void update_hour(void) {
         unsigned int seconds = ttyclock->date.second[0] * 10 + ttyclock->date.second[1];
         unsigned int minutes = ttyclock->date.minute[0] * 10 + ttyclock->date.minute[1];
@@ -371,38 +358,17 @@ int main(int argc, char **argv) {
         atexit(cleanup);
 
         int color;
-        while (c != -1) {
-                switch(c) {
-                case 'h':
-                        usage(argv[0], EXIT_SUCCESS);
-                        break;
-                case 'v':
-                        puts("ttytimer v0.1");
-                        exit(EXIT_SUCCESS);
-                        break;
-                case 'b':
-                        ttyclock->bold = True;
-                        break;
-                case 'C':
-                        if ((color = color_name_to_number(optarg)) != -1) {
-                                ttyclock->option.color = color;
-                        } else {
-                                printf("Invalid color specified: %s\n", optarg);
-                                exit(EXIT_FAILURE);
-                        }
-
-                        break;
-                default:
-                        usage(argv[0], EXIT_FAILURE);
-                        break;
+        if (c == 'C') {
+                if ((color = color_name_to_number(optarg)) != -1) {
+                        ttyclock->option.color = color;
+                } else {
+                        printf("Invalid color specified: %s\n", optarg);
+                        exit(EXIT_FAILURE);
                 }
         }
 
-        /* We're missing the final time argument. */
-        if (optind == argc) usage(argv[0], EXIT_FAILURE);
-
         parse_time_arg(argv[optind]);
-        /* Ensure input is anything but 0. */
+
         if (time_is_zero()) {
                 puts("Time argument is zero");
                 exit(EXIT_FAILURE);
@@ -419,6 +385,5 @@ int main(int argc, char **argv) {
         }
 
         endwin();
-
         return 0;
 }
