@@ -1,5 +1,5 @@
-#ifndef TTYCLOCK_H_INCLUDED
-#define TTYCLOCK_H_INCLUDED
+#ifndef clitimer_H_INCLUDED
+#define clitimer_H_INCLUDED
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -21,7 +21,7 @@
 
 typedef enum { False, True } Bool;
 
-/* Global ttyclock struct */
+/* Global clitimer struct */
 typedef struct {
 	/* while() boolean */
 	Bool running;
@@ -61,7 +61,7 @@ typedef struct {
 	/* Clock member */
 	WINDOW *framewin;
 	WINDOW *datewin;
-} ttyclock_t;
+} clitimer_t;
 
 /* Prototypes */
 void init(void);
@@ -76,7 +76,7 @@ void set_box(Bool b);
 void key_event(void);
 
 /* Global variable */
-ttyclock_t *ttyclock;
+clitimer_t *clitimer;
 
 /* Number matrix */
 const Bool number[][15] = {
@@ -92,4 +92,4 @@ const Bool number[][15] = {
 	{1,1,1,1,0,1,1,1,1,0,0,1,1,1,1}, /* 9 */
 };
 
-#endif /* TTYCLOCK_H_INCLUDED */
+#endif /* clitimer_H_INCLUDED */

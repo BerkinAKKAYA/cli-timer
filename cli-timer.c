@@ -2,17 +2,17 @@
 #include "cli-timer.h"
 
 static bool time_is_zero(void) {
-	return ttyclock->date.hour[0]   == 0
-		&& ttyclock->date.hour[1]   == 0
-		&& ttyclock->date.minute[0] == 0
-		&& ttyclock->date.minute[1] == 0
-		&& ttyclock->date.second[0] == 0
-		&& ttyclock->date.second[1] == 0;
+	return clitimer->date.hour[0]   == 0
+		&& clitimer->date.hour[1]   == 0
+		&& clitimer->date.minute[0] == 0
+		&& clitimer->date.minute[1] == 0
+		&& clitimer->date.second[0] == 0
+		&& clitimer->date.second[1] == 0;
 }
 
 void init(void) {
 	struct sigaction sig;
-	ttyclock->bg = COLOR_BLACK;
+	clitimer->bg = COLOR_BLACK;
 
 	initscr();
 	cbreak();
@@ -23,13 +23,13 @@ void init(void) {
 	clear();
 
 	if (use_default_colors() == OK) {
-		ttyclock->bg = -1;
+		clitimer->bg = -1;
 	}
 
 	/* Init color pair */
-	init_pair(0, ttyclock->bg, ttyclock->bg);
-	init_pair(1, ttyclock->bg, ttyclock->option.color);
-	init_pair(2, ttyclock->option.color, ttyclock->bg);
+	init_pair(0, clitimer->bg, clitimer->bg);
+	init_pair(1, clitimer->bg, clitimer->option.color);
+	init_pair(2, clitimer->option.color, clitimer->bg);
 	refresh();
 
 	/* Init signal handler */
@@ -41,33 +41,33 @@ void init(void) {
 	sigaction(SIGSEGV,  &sig, NULL);
 
 	/* Init global struct */
-	ttyclock->running = True;
-	if(!ttyclock->geo.x) ttyclock->geo.x = 0;
-	if(!ttyclock->geo.y) ttyclock->geo.y = 0;
-	if(!ttyclock->geo.a) ttyclock->geo.a = 1;
-	if(!ttyclock->geo.b) ttyclock->geo.b = 1;
-	ttyclock->geo.w = SECFRAMEW;
-	ttyclock->geo.h = 7;
-	ttyclock->tm = localtime(&(ttyclock->lt));
-	ttyclock->lt = time(NULL);
+	clitimer->running = True;
+	if(!clitimer->geo.x) clitimer->geo.x = 0;
+	if(!clitimer->geo.y) clitimer->geo.y = 0;
+	if(!clitimer->geo.a) clitimer->geo.a = 1;
+	if(!clitimer->geo.b) clitimer->geo.b = 1;
+	clitimer->geo.w = SECFRAMEW;
+	clitimer->geo.h = 7;
+	clitimer->tm = localtime(&(clitimer->lt));
+	clitimer->lt = time(NULL);
 
 	/* Create clock win */
-	ttyclock->framewin = newwin(ttyclock->geo.h, ttyclock->geo.w, ttyclock->geo.x, ttyclock->geo.y);
+	clitimer->framewin = newwin(clitimer->geo.h, clitimer->geo.w, clitimer->geo.x, clitimer->geo.y);
 	
-	if (ttyclock->bold) {
-		wattron(ttyclock->framewin, A_BLINK);
+	if (clitimer->bold) {
+		wattron(clitimer->framewin, A_BLINK);
 	}
 
 	/* Create the date win */
-	int beginY = ttyclock->geo.x + ttyclock->geo.h - 1;
-	int beginX = ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.timestr) / 2) - 1;
-	ttyclock->datewin = newwin(DATEWINH, strlen(ttyclock->date.timestr) + 2, beginY, beginX);
+	int beginY = clitimer->geo.x + clitimer->geo.h - 1;
+	int beginX = clitimer->geo.y + (clitimer->geo.w / 2) - (strlen(clitimer->date.timestr) / 2) - 1;
+	clitimer->datewin = newwin(DATEWINH, strlen(clitimer->date.timestr) + 2, beginY, beginX);
 
-	clearok(ttyclock->datewin, True);
+	clearok(clitimer->datewin, True);
 	set_center();
 	nodelay(stdscr, True);
-	wrefresh(ttyclock->datewin);
-	wrefresh(ttyclock->framewin);
+	wrefresh(clitimer->datewin);
+	wrefresh(clitimer->framewin);
 }
 
 void signal_handler(int signal) {
@@ -78,7 +78,7 @@ void signal_handler(int signal) {
 			break;
 		case SIGINT:
 		case SIGTERM:
-			ttyclock->running = False;
+			clitimer->running = False;
 			break;
 		case SIGSEGV:
 			endwin();
@@ -89,28 +89,28 @@ void signal_handler(int signal) {
 }
 
 void cleanup(void) {
-	if (ttyclock->ttyscr) delscreen(ttyclock->ttyscr);
-	if (ttyclock) free(ttyclock);
+	if (clitimer->ttyscr) delscreen(clitimer->ttyscr);
+	if (clitimer) free(clitimer);
 }
 
 void update_hour(void) {
-	unsigned int seconds = ttyclock->date.second[0] * 10 + ttyclock->date.second[1];
-	unsigned int minutes = ttyclock->date.minute[0] * 10 + ttyclock->date.minute[1];
-	unsigned int hours   = ttyclock->date.hour[0]   * 10 + ttyclock->date.hour[1];
+	unsigned int seconds = clitimer->date.second[0] * 10 + clitimer->date.second[1];
+	unsigned int minutes = clitimer->date.minute[0] * 10 + clitimer->date.minute[1];
+	unsigned int hours   = clitimer->date.hour[0]   * 10 + clitimer->date.hour[1];
 
 	if (minutes == 0 && seconds == 0) hours = hours == 0 ? 59 : hours - 1;
 	if (seconds == 0) minutes = minutes == 0 ? 59 : minutes - 1;
 	seconds = seconds == 0 ? 59 : seconds - 1;
 
-	/* Put it all back into ttyclock. */
-	ttyclock->date.hour[0] = hours / 10;
-	ttyclock->date.hour[1] = hours % 10;
+	/* Put it all back into clitimer. */
+	clitimer->date.hour[0] = hours / 10;
+	clitimer->date.hour[1] = hours % 10;
 
-	ttyclock->date.minute[0] = minutes / 10;
-	ttyclock->date.minute[1] = minutes % 10;
+	clitimer->date.minute[0] = minutes / 10;
+	clitimer->date.minute[1] = minutes % 10;
 
-	ttyclock->date.second[0] = seconds / 10;
-	ttyclock->date.second[1] = seconds % 10;
+	clitimer->date.second[0] = seconds / 10;
+	clitimer->date.second[1] = seconds % 10;
 }
 
 void draw_number(int n, int x, int y, unsigned int color) {
@@ -122,14 +122,14 @@ void draw_number(int n, int x, int y, unsigned int color) {
 			++x;
 		}
 
-		if (ttyclock->bold) wattron(ttyclock->framewin, A_BLINK);
-		else wattroff(ttyclock->framewin, A_BLINK);
+		if (clitimer->bold) wattron(clitimer->framewin, A_BLINK);
+		else wattroff(clitimer->framewin, A_BLINK);
 
-		wbkgdset(ttyclock->framewin, COLOR_PAIR(number[n][i/2] * color));
-		mvwaddch(ttyclock->framewin, x, sy, ' ');
+		wbkgdset(clitimer->framewin, COLOR_PAIR(number[n][i/2] * color));
+		mvwaddch(clitimer->framewin, x, sy, ' ');
 	}
 
-	wrefresh(ttyclock->framewin);
+	wrefresh(clitimer->framewin);
 }
 
 void draw_clock(void) {
@@ -143,35 +143,35 @@ void draw_clock(void) {
 	}
 
 	/* Draw hour numbers */
-	draw_number(ttyclock->date.hour[0], 1, 1, numcolor);
-	draw_number(ttyclock->date.hour[1], 1, 8, numcolor);
+	draw_number(clitimer->date.hour[0], 1, 1, numcolor);
+	draw_number(clitimer->date.hour[1], 1, 8, numcolor);
 
 	/* 2 dot for number separation */
-	wbkgdset(ttyclock->framewin, dotcolor);
-	mvwaddstr(ttyclock->framewin, 2, 16, "  ");
-	mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+	wbkgdset(clitimer->framewin, dotcolor);
+	mvwaddstr(clitimer->framewin, 2, 16, "  ");
+	mvwaddstr(clitimer->framewin, 4, 16, "  ");
 
 	/* Draw minute numbers */
-	draw_number(ttyclock->date.minute[0], 1, 20, numcolor);
-	draw_number(ttyclock->date.minute[1], 1, 27, numcolor);
+	draw_number(clitimer->date.minute[0], 1, 20, numcolor);
+	draw_number(clitimer->date.minute[1], 1, 27, numcolor);
 
 	/* Draw the date */
-	if (ttyclock->bold) wattron(ttyclock->datewin, A_BOLD);
-	else wattroff(ttyclock->datewin, A_BOLD);
+	if (clitimer->bold) wattron(clitimer->datewin, A_BOLD);
+	else wattroff(clitimer->datewin, A_BOLD);
 
-	wbkgdset(ttyclock->datewin, (COLOR_PAIR(2)));
-	mvwprintw(ttyclock->datewin, (DATEWINH / 2), 1, ttyclock->date.timestr);
-	wrefresh(ttyclock->datewin);
+	wbkgdset(clitimer->datewin, (COLOR_PAIR(2)));
+	mvwprintw(clitimer->datewin, (DATEWINH / 2), 1, clitimer->date.timestr);
+	wrefresh(clitimer->datewin);
 
 	/* Draw second frame. */
 	/* Again 2 dot for number separation */
-	wbkgdset(ttyclock->framewin, dotcolor);
-	mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
-	mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+	wbkgdset(clitimer->framewin, dotcolor);
+	mvwaddstr(clitimer->framewin, 2, NORMFRAMEW, "  ");
+	mvwaddstr(clitimer->framewin, 4, NORMFRAMEW, "  ");
 
 	/* Draw second numbers */
-	draw_number(ttyclock->date.second[0], 1, 39, numcolor);
-	draw_number(ttyclock->date.second[1], 1, 46, numcolor);
+	draw_number(clitimer->date.second[0], 1, 39, numcolor);
+	draw_number(clitimer->date.second[1], 1, 46, numcolor);
 }
 
 void clock_move(int x, int y, int w, int h) {
@@ -181,43 +181,43 @@ void set_second(void) {
 	int new_w = SECFRAMEW;
 	int y_adj;
 
-	for(y_adj = 0; (ttyclock->geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
+	for(y_adj = 0; (clitimer->geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
 
 	set_center();
 }
 
 void set_center(void) {
-	int x = (LINES / 2 - (ttyclock->geo.h / 2));
-	int y = (COLS  / 2 - (ttyclock->geo.w / 2));
+	int x = (LINES / 2 - (clitimer->geo.h / 2));
+	int y = (COLS  / 2 - (clitimer->geo.w / 2));
 
 	/* Erase border for a clean move */
-	wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
-	wborder(ttyclock->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-	werase(ttyclock->framewin);
-	wrefresh(ttyclock->framewin);
+	wbkgdset(clitimer->framewin, COLOR_PAIR(0));
+	wborder(clitimer->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+	werase(clitimer->framewin);
+	wrefresh(clitimer->framewin);
 
-	wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
-	wborder(ttyclock->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-	werase(ttyclock->datewin);
-	wrefresh(ttyclock->datewin);
+	wbkgdset(clitimer->datewin, COLOR_PAIR(0));
+	wborder(clitimer->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+	werase(clitimer->datewin);
+	wrefresh(clitimer->datewin);
 
 	/* Frame win move */
-	mvwin(ttyclock->framewin, (ttyclock->geo.x = x), (ttyclock->geo.y = y));
-	wresize(ttyclock->framewin, ttyclock->geo.h, ttyclock->geo.w);
+	mvwin(clitimer->framewin, (clitimer->geo.x = x), (clitimer->geo.y = y));
+	wresize(clitimer->framewin, clitimer->geo.h, clitimer->geo.w);
 
 	/* Date win move */
-	int mvX = ttyclock->geo.x + ttyclock->geo.h - 1;
-	int mvY = ttyclock->geo.y + (ttyclock->geo.w / 2)- (strlen(ttyclock->date.timestr) / 2) - 1;
-	mvwin(ttyclock->datewin, mvX, mvY);
+	int mvX = clitimer->geo.x + clitimer->geo.h - 1;
+	int mvY = clitimer->geo.y + (clitimer->geo.w / 2)- (strlen(clitimer->date.timestr) / 2) - 1;
+	mvwin(clitimer->datewin, mvX, mvY);
 	
-	wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.timestr) + 2);
+	wresize(clitimer->datewin, DATEWINH, strlen(clitimer->date.timestr) + 2);
 
-	wrefresh(ttyclock->framewin);
-	wrefresh(ttyclock->datewin); 
+	wrefresh(clitimer->framewin);
+	wrefresh(clitimer->datewin); 
 }
 
 /* Fills two elements from digits into time, handling the -1 case. */
-static void fill_ttyclock_time(int *digits, unsigned int *time) {
+static void fill_clitimer_time(int *digits, unsigned int *time) {
 	if (digits[1] == -1) {
 		time[0] = 0;
 		if (digits[0] == -1) time[1] = 0;
@@ -238,27 +238,27 @@ void key_event(void) {
 	switch(c) {
 		case 'q':
 		case 'Q':
-			ttyclock->running = False;
+			clitimer->running = False;
 			break;
 
 		case 'r':
 		case 'R':
-			fill_ttyclock_time(ttyclock->initial_digits, ttyclock->date.hour);
-			fill_ttyclock_time(ttyclock->initial_digits + 2, ttyclock->date.minute);
-			fill_ttyclock_time(ttyclock->initial_digits + 4, ttyclock->date.second);
+			fill_clitimer_time(clitimer->initial_digits, clitimer->date.hour);
+			fill_clitimer_time(clitimer->initial_digits + 2, clitimer->date.minute);
+			fill_clitimer_time(clitimer->initial_digits + 4, clitimer->date.second);
 			break;
         
 		case ' ':
-			ttyclock->paused = !ttyclock->paused;
+			clitimer->paused = !clitimer->paused;
 
 		default:
 			nanosleep(&length, NULL);
 
 			for (i = 0; i < 8; ++i) {
 				if (c == (i + '0')) {
-					ttyclock->option.color = i;
-					init_pair(1, ttyclock->bg, i);
-					init_pair(2, i, ttyclock->bg);
+					clitimer->option.color = i;
+					init_pair(1, clitimer->bg, i);
+					init_pair(2, i, clitimer->bg);
 				}
 			}
 
@@ -266,7 +266,7 @@ void key_event(void) {
 		}
 }
 
-/* Parses time into ttyclock->date.hour/minute/second. Exits with
+/* Parses time into clitimer->date.hour/minute/second. Exits with
  * an error message on bad time format. Sets timestr to what was
  * parsed.
  * time format: hh:mm:ss, where all but the colons are optional.
@@ -299,20 +299,20 @@ static void parse_time_arg(char *time) {
 		++time;
 	}
 
-	fill_ttyclock_time(digits, ttyclock->date.hour);
-	fill_ttyclock_time(digits + 2, ttyclock->date.minute);
-	fill_ttyclock_time(digits + 4, ttyclock->date.second);
-	memcpy(ttyclock->initial_digits, digits, N_TIME_DIGITS * sizeof(int));
+	fill_clitimer_time(digits, clitimer->date.hour);
+	fill_clitimer_time(digits + 2, clitimer->date.minute);
+	fill_clitimer_time(digits + 4, clitimer->date.second);
+	memcpy(clitimer->initial_digits, digits, N_TIME_DIGITS * sizeof(int));
 
-	ttyclock->date.timestr[0] = ttyclock->date.hour[0] + '0';
-	ttyclock->date.timestr[1] = ttyclock->date.hour[1] + '0';
-	ttyclock->date.timestr[2] = ':';
-	ttyclock->date.timestr[3] = ttyclock->date.minute[0] + '0';
-	ttyclock->date.timestr[4] = ttyclock->date.minute[1] + '0';
-	ttyclock->date.timestr[5] = ':';
-	ttyclock->date.timestr[6] = ttyclock->date.second[0] + '0';
-	ttyclock->date.timestr[7] = ttyclock->date.second[1] + '0';
-	ttyclock->date.timestr[8] = '\0';
+	clitimer->date.timestr[0] = clitimer->date.hour[0] + '0';
+	clitimer->date.timestr[1] = clitimer->date.hour[1] + '0';
+	clitimer->date.timestr[2] = ':';
+	clitimer->date.timestr[3] = clitimer->date.minute[0] + '0';
+	clitimer->date.timestr[4] = clitimer->date.minute[1] + '0';
+	clitimer->date.timestr[5] = ':';
+	clitimer->date.timestr[6] = clitimer->date.second[0] + '0';
+	clitimer->date.timestr[7] = clitimer->date.second[1] + '0';
+	clitimer->date.timestr[8] = '\0';
 }
 
 /* Converts the name of a colour to its ncurses number. Case insensitive. */
@@ -329,13 +329,13 @@ int color_name_to_number(const char *color) {
 }
 
 int main(int argc, char **argv) {
-	/* Alloc ttyclock */
-	ttyclock = malloc(sizeof(ttyclock_t));
-	assert(ttyclock != NULL);
-	memset(ttyclock, 0, sizeof(ttyclock_t));
+	/* Alloc clitimer */
+	clitimer = malloc(sizeof(clitimer_t));
+	assert(clitimer != NULL);
+	memset(clitimer, 0, sizeof(clitimer_t));
 
 	/* Default color */
-	ttyclock->option.color = COLOR_CYAN;
+	clitimer->option.color = COLOR_CYAN;
 
 	/* Run cleanup on exit */
 	atexit(cleanup);
@@ -349,10 +349,10 @@ int main(int argc, char **argv) {
 
 	init();
 	attron(A_BLINK);
-	while (ttyclock->running) {
+	while (clitimer->running) {
 		draw_clock();
 		key_event();
-		if (!time_is_zero() && !ttyclock->paused) {
+		if (!time_is_zero() && !clitimer->paused) {
 			update_hour();
 		}
 	}
