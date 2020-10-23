@@ -44,8 +44,6 @@ void init(void) {
 	clitimer->running = True;
 	if(!clitimer->geo.x) clitimer->geo.x = 0;
 	if(!clitimer->geo.y) clitimer->geo.y = 0;
-	if(!clitimer->geo.a) clitimer->geo.a = 1;
-	if(!clitimer->geo.b) clitimer->geo.b = 1;
 	clitimer->geo.w = SECFRAMEW;
 	clitimer->geo.h = 7;
 	clitimer->tm = localtime(&(clitimer->lt));

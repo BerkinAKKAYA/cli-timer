@@ -41,8 +41,6 @@ typedef struct {
 	/* Clock geometry */
 	struct {
 		int x, y, w, h;
-		/* For rebound use (see clock_rebound())*/
-		int a, b;
 	} geo;
 
 	/* Date content ([2] = number by number) */
