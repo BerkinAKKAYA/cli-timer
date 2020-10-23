@@ -46,8 +46,6 @@ void init(void) {
 	if(!clitimer->geo.y) clitimer->geo.y = 0;
 	clitimer->geo.w = SECFRAMEW;
 	clitimer->geo.h = 7;
-	clitimer->tm = localtime(&(clitimer->lt));
-	clitimer->lt = time(NULL);
 
 	/* Create clock win */
 	clitimer->framewin = newwin(clitimer->geo.h, clitimer->geo.w, clitimer->geo.x, clitimer->geo.y);
