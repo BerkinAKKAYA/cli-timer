@@ -61,12 +61,7 @@ void init(void) {
 	/* Create the date win */
 	int beginY = ttyclock->geo.x + ttyclock->geo.h - 1;
 	int beginX = ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.timestr) / 2) - 1;
-	ttyclock->datewin = newwin(
-		DATEWINH,
-		strlen(ttyclock->date.timestr) + 2,
-		beginY,
-		beginX
-	);
+	ttyclock->datewin = newwin(DATEWINH, strlen(ttyclock->date.timestr) + 2, beginY, beginX);
 
 	clearok(ttyclock->datewin, True);
 	set_center();
@@ -180,6 +175,21 @@ void draw_clock(void) {
 }
 
 void clock_move(int x, int y, int w, int h) {
+}
+
+void set_second(void) {
+	int new_w = SECFRAMEW;
+	int y_adj;
+
+	for(y_adj = 0; (ttyclock->geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
+
+	set_center();
+}
+
+void set_center(void) {
+	int x = (LINES / 2 - (ttyclock->geo.h / 2));
+	int y = (COLS  / 2 - (ttyclock->geo.w / 2));
+
 	/* Erase border for a clean move */
 	wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
 	wborder(ttyclock->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
@@ -193,35 +203,17 @@ void clock_move(int x, int y, int w, int h) {
 
 	/* Frame win move */
 	mvwin(ttyclock->framewin, (ttyclock->geo.x = x), (ttyclock->geo.y = y));
-	wresize(ttyclock->framewin, (ttyclock->geo.h = h), (ttyclock->geo.w = w));
+	wresize(ttyclock->framewin, ttyclock->geo.h, ttyclock->geo.w);
 
 	/* Date win move */
-	mvwin(ttyclock->datewin,
-			ttyclock->geo.x + ttyclock->geo.h - 1,
-			ttyclock->geo.y + (ttyclock->geo.w / 2)
-			- (strlen(ttyclock->date.timestr) / 2) - 1);
+	int mvX = ttyclock->geo.x + ttyclock->geo.h - 1;
+	int mvY = ttyclock->geo.y + (ttyclock->geo.w / 2)- (strlen(ttyclock->date.timestr) / 2) - 1;
+	mvwin(ttyclock->datewin, mvX, mvY);
 	
 	wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.timestr) + 2);
 
 	wrefresh(ttyclock->framewin);
 	wrefresh(ttyclock->datewin); 
-}
-
-void set_second(void) {
-	int new_w = SECFRAMEW;
-	int y_adj;
-
-	for(y_adj = 0; (ttyclock->geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
-
-	clock_move(ttyclock->geo.x, (ttyclock->geo.y - y_adj), new_w, ttyclock->geo.h);
-	set_center();
-}
-
-void set_center(void) {
-	clock_move((LINES / 2 - (ttyclock->geo.h / 2)),
-				(COLS  / 2 - (ttyclock->geo.w / 2)),
-				ttyclock->geo.w,
-				ttyclock->geo.h);
 }
 
 /* Fills two elements from digits into time, handling the -1 case. */
@@ -281,9 +273,11 @@ void key_event(void) {
  */
 static void parse_time_arg(char *time) {
 	int digits[N_TIME_DIGITS];
-	for (int i = 0; i < N_TIME_DIGITS; ++i) digits[i] = -1;
+	for (int i=0; i<N_TIME_DIGITS; ++i) {
+		digits[i] = -1;
+	}
 
-	int i = 0, remaining = 2;
+	int i=0, remaining=2;
 	while (*time != '\0') {
 		if (isdigit(*time)) {
 			if (remaining == 0) {
@@ -335,30 +329,18 @@ int color_name_to_number(const char *color) {
 }
 
 int main(int argc, char **argv) {
-	int c = getopt(argc, argv, "vbhxC:");
-
 	/* Alloc ttyclock */
 	ttyclock = malloc(sizeof(ttyclock_t));
 	assert(ttyclock != NULL);
 	memset(ttyclock, 0, sizeof(ttyclock_t));
 
 	/* Default color */
-	ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
+	ttyclock->option.color = COLOR_CYAN;
 
 	/* Run cleanup on exit */
 	atexit(cleanup);
-
-	int color;
-	if (c == 'C') {
-		if ((color = color_name_to_number(optarg)) != -1) {
-			ttyclock->option.color = color;
-		} else {
-			printf("Invalid color specified: %s\n", optarg);
-			exit(EXIT_FAILURE);
-		}
-	}
-
 	parse_time_arg(argv[optind]);
+	
 
 	if (time_is_zero()) {
 		puts("Time argument is zero");
