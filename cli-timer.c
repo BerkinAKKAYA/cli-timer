@@ -170,9 +170,6 @@ void draw_clock(void) {
 	draw_number(clitimer->date.second[1], 1, 46, numcolor);
 }
 
-void clock_move(int x, int y, int w, int h) {
-}
-
 void set_second(void) {
 	int new_w = SECFRAMEW;
 	int y_adj;
@@ -183,33 +180,31 @@ void set_second(void) {
 }
 
 void set_center(void) {
-	int x = (LINES / 2 - (clitimer->geo.h / 2));
-	int y = (COLS  / 2 - (clitimer->geo.w / 2));
+	clitimer->geo.x = (LINES / 2 - (clitimer->geo.h / 2));
+	clitimer->geo.y = (COLS  / 2 - (clitimer->geo.w / 2));
 
-	/* Erase border for a clean move */
+	int dateX = clitimer->geo.x + clitimer->geo.h - 1;
+	int dateY = clitimer->geo.y + (clitimer->geo.w / 2) - (strlen(clitimer->date.timestr) / 2) - 1;
+
+	mvwin(clitimer->framewin, clitimer->geo.x, clitimer->geo.y);
+	mvwin(clitimer->datewin, dateX, dateY);
+	
+	/*
 	wbkgdset(clitimer->framewin, COLOR_PAIR(0));
-	wborder(clitimer->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-	werase(clitimer->framewin);
-	wrefresh(clitimer->framewin);
-
 	wbkgdset(clitimer->datewin, COLOR_PAIR(0));
+	wborder(clitimer->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
 	wborder(clitimer->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+	werase(clitimer->framewin);
 	werase(clitimer->datewin);
+	wrefresh(clitimer->framewin);
 	wrefresh(clitimer->datewin);
 
-	/* Frame win move */
-	mvwin(clitimer->framewin, (clitimer->geo.x = x), (clitimer->geo.y = y));
 	wresize(clitimer->framewin, clitimer->geo.h, clitimer->geo.w);
-
-	/* Date win move */
-	int mvX = clitimer->geo.x + clitimer->geo.h - 1;
-	int mvY = clitimer->geo.y + (clitimer->geo.w / 2)- (strlen(clitimer->date.timestr) / 2) - 1;
-	mvwin(clitimer->datewin, mvX, mvY);
-	
 	wresize(clitimer->datewin, DATEWINH, strlen(clitimer->date.timestr) + 2);
 
 	wrefresh(clitimer->framewin);
-	wrefresh(clitimer->datewin); 
+	wrefresh(clitimer->datewin);
+	*/
 }
 
 /* Fills two elements from digits into time, handling the -1 case. */
@@ -225,11 +220,8 @@ static void fill_clitimer_time(int *digits, unsigned int *time) {
 }
 
 void key_event(void) {
-	int i = 0;
-	int c = wgetch(stdscr);
-
-	// {  s, ns }
 	struct timespec length = { 1, 0 };
+	int c = wgetch(stdscr);
 
 	switch(c) {
 		case 'q':
@@ -239,9 +231,9 @@ void key_event(void) {
 
 		case 'r':
 		case 'R':
-			fill_clitimer_time(clitimer->initial_digits, clitimer->date.hour);
-			fill_clitimer_time(clitimer->initial_digits + 2, clitimer->date.minute);
-			fill_clitimer_time(clitimer->initial_digits + 4, clitimer->date.second);
+			fill_clitimer_time(clitimer->initial_digits,   clitimer->date.hour);
+			fill_clitimer_time(clitimer->initial_digits+2, clitimer->date.minute);
+			fill_clitimer_time(clitimer->initial_digits+4, clitimer->date.second);
 			break;
         
 		case ' ':
@@ -250,7 +242,7 @@ void key_event(void) {
 		default:
 			nanosleep(&length, NULL);
 
-			for (i = 0; i < 8; ++i) {
+			for (int i=0; i<8; ++i) {
 				if (c == (i + '0')) {
 					clitimer->option.color = i;
 					init_pair(1, clitimer->bg, i);
@@ -336,7 +328,6 @@ int main(int argc, char **argv) {
 	/* Run cleanup on exit */
 	atexit(cleanup);
 	parse_time_arg(argv[optind]);
-	
 
 	if (time_is_zero()) {
 		puts("Time argument is zero");
