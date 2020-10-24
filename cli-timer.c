@@ -294,6 +294,13 @@ static void parse_time_arg(char *time) {
 		}
 	}
 
+	/*
+	 * Normally if you type `cli-timer 10`, it will stop counting down from 10
+	 * hours. These if statements makes it count down from 10 seconds. Likewise
+	 * if you type `cli-timer 10:00` it would still count down from 10 hours,
+	 * now it will count down from 10 minutes. `cli-timer 10:00:00` acts exactly
+	 * same as before.
+	 */
 	if (digits[5] == -1 && digits[4] == -1 && digits[3] == -1 && digits[2] == -1) {
 		digits[5] = digits[1];
 		digits[4] = digits[0];
