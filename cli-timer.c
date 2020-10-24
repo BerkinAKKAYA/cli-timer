@@ -287,6 +287,31 @@ static void parse_time_arg(char *time) {
 		++time;
 	}
 
+	int length = 0;
+	for (int i=0; i<N_TIME_DIGITS; i++) {
+		if (digits[i] != -1) {
+			length ++;
+		}
+	}
+
+	if (digits[5] == -1 && digits[4] == -1 && digits[3] == -1 && digits[2] == -1) {
+		digits[5] = digits[1];
+		digits[4] = digits[0];
+		digits[3] = -1;
+		digits[2] = -1;
+		digits[1] = -1;
+		digits[0] = -1;
+	} else if (digits[5] == -1 && digits[4] == -1) {
+		digits[5] = digits[3];
+		digits[4] = digits[2];
+		digits[3] = digits[1];
+		digits[2] = digits[0];
+		digits[1] = -1;
+		digits[0] = -1;
+	}
+
+	printf("%d\n", digits[5]);
+	
 	fill_clitimer_time(digits, clitimer->date.hour);
 	fill_clitimer_time(digits + 2, clitimer->date.minute);
 	fill_clitimer_time(digits + 4, clitimer->date.second);
