@@ -303,19 +303,6 @@ static void parse_time_arg(char *time) {
 	clitimer->date.timestr[8] = '\0';
 }
 
-/* Converts the name of a colour to its ncurses number. Case insensitive. */
-int color_name_to_number(const char *color) {
-	if (strcasecmp(color, "black") == 0) return COLOR_BLACK;
-	else if (strcasecmp(color, "red") == 0) return COLOR_RED;
-	else if (strcasecmp(color, "green") == 0) return COLOR_GREEN;
-	else if (strcasecmp(color, "yellow") == 0) return COLOR_YELLOW;
-	else if (strcasecmp(color, "blue") == 0) return COLOR_BLUE;
-	else if (strcasecmp(color, "magenta") == 0) return COLOR_MAGENTA;
-	else if (strcasecmp(color, "cyan") == 0) return COLOR_CYAN;
-	else if (strcasecmp(color, "white") == 0) return COLOR_WHITE;
-	else return -1;
-}
-
 int main(int argc, char **argv) {
 	/* Alloc clitimer */
 	clitimer = malloc(sizeof(clitimer_t));
