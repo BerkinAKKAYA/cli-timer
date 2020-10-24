@@ -302,6 +302,8 @@ static void parse_time_arg(char *time) {
 	 * same as before.
 	 */
 	if (digits[5] == -1 && digits[4] == -1 && digits[3] == -1 && digits[2] == -1) {
+		// If seconds and minutes are not specified, make them zero and use the
+		// first arguments as seconds.
 		digits[5] = digits[1];
 		digits[4] = digits[0];
 		digits[3] = -1;
@@ -309,6 +311,8 @@ static void parse_time_arg(char *time) {
 		digits[1] = -1;
 		digits[0] = -1;
 	} else if (digits[5] == -1 && digits[4] == -1) {
+		// If seconds are not specified, use minutes as seconds and use hours as
+		// minutes.
 		digits[5] = digits[3];
 		digits[4] = digits[2];
 		digits[3] = digits[1];
