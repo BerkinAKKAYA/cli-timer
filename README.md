@@ -42,8 +42,3 @@ usage : %s [-xbvih] [-C color] hh:mm:ss
 ```
 make install
 ```
-
-## TODO
-
-`cli-timer 25` should be 25 seconds,
-`cli-timer 25:00` should be 25 minutes and etc.
