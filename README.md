@@ -47,4 +47,4 @@ make install
 
 ---
 
-> Created by Berkin AKKAYA for personal use and education purposes.
+> Created by Berkin AKKAYA for personal use and educational purposes.
