@@ -1,15 +1,6 @@
 #include <ctype.h>
 #include "cli-timer.h"
 
-static bool time_is_zero(void) {
-	return clitimer->date.hour[0]   == 0
-		&& clitimer->date.hour[1]   == 0
-		&& clitimer->date.minute[0] == 0
-		&& clitimer->date.minute[1] == 0
-		&& clitimer->date.second[0] == 0
-		&& clitimer->date.second[1] == 0;
-}
-
 void init(void) {
 	struct sigaction sig;
 	clitimer->bg = COLOR_BLACK;
@@ -89,14 +80,15 @@ void cleanup(void) {
 	if (clitimer) free(clitimer);
 }
 
+/* Update Time Array */
 void update_hour(void) {
 	unsigned int seconds = clitimer->date.second[0] * 10 + clitimer->date.second[1];
 	unsigned int minutes = clitimer->date.minute[0] * 10 + clitimer->date.minute[1];
 	unsigned int hours   = clitimer->date.hour[0]   * 10 + clitimer->date.hour[1];
 
-	if (minutes == 0 && seconds == 0) hours = hours == 0 ? 59 : hours - 1;
-	if (seconds == 0) minutes = minutes == 0 ? 59 : minutes - 1;
-	seconds = seconds == 0 ? 59 : seconds - 1;
+	if (minutes == 59 && seconds == 59) hours = hours == 59 ? 0 : hours + 1;
+	if (seconds == 59) minutes = minutes == 59 ? 0 : minutes + 1;
+	seconds = seconds == 59 ? 0 : seconds + 1;
 
 	/* Put it all back into clitimer. */
 	clitimer->date.hour[0] = hours / 10;
@@ -135,7 +127,6 @@ void draw_clock(void) {
 	/* Change the colours to blink at certain times. */
 	if (time(NULL) % 2 == 0) {
 		dotcolor = COLOR_PAIR(2);
-		if (time_is_zero()) numcolor = 2;
 	}
 
 	/* Draw hour numbers */
@@ -254,89 +245,18 @@ void key_event(void) {
 		}
 }
 
-/* Parses time into clitimer->date.hour/minute/second. Exits with
- * an error message on bad time format. Sets timestr to what was
- * parsed.
- * time format: hh:mm:ss, where all but the colons are optional.
- */
-static void parse_time_arg(char *time) {
+/* Fill the time array with zeros */
+static void initialize_time_digits(char *time) {
 	int digits[N_TIME_DIGITS];
+
 	for (int i=0; i<N_TIME_DIGITS; ++i) {
-		digits[i] = -1;
+		digits[i] = 0;
 	}
 
-	int i=0, remaining=2;
-	while (*time != '\0') {
-		if (isdigit(*time)) {
-			if (remaining == 0) {
-				puts("Too many digits in time argument");
-				exit(EXIT_FAILURE);
-			}
-
-			digits[i] = *time - '0';
-			++i;
-			--remaining;
-		} else if (*time == ':') {
-			i += remaining;
-			remaining = 2;
-		} else {
-			puts("Invalid character in time argument");
-			exit(EXIT_FAILURE);
-		}
-
-		++time;
-	}
-
-	int length = 0;
-	for (int i=0; i<N_TIME_DIGITS; i++) {
-		if (digits[i] != -1) {
-			length ++;
-		}
-	}
-
-	/*
-	 * Normally if you type `cli-timer 10`, it will stop counting down from 10
-	 * hours. These if statements makes it count down from 10 seconds. Likewise
-	 * if you type `cli-timer 10:00` it would still count down from 10 hours,
-	 * now it will count down from 10 minutes. `cli-timer 10:00:00` acts exactly
-	 * same as before.
-	 */
-	if (digits[5] == -1 && digits[4] == -1 && digits[3] == -1 && digits[2] == -1) {
-		// If seconds and minutes are not specified, make them zero and use the
-		// first arguments as seconds.
-		digits[5] = digits[1];
-		digits[4] = digits[0];
-		digits[3] = -1;
-		digits[2] = -1;
-		digits[1] = -1;
-		digits[0] = -1;
-	} else if (digits[5] == -1 && digits[4] == -1) {
-		// If seconds are not specified, use minutes as seconds and use hours as
-		// minutes.
-		digits[5] = digits[3];
-		digits[4] = digits[2];
-		digits[3] = digits[1];
-		digits[2] = digits[0];
-		digits[1] = -1;
-		digits[0] = -1;
-	}
-
-	printf("%d\n", digits[5]);
-	
 	fill_clitimer_time(digits, clitimer->date.hour);
 	fill_clitimer_time(digits + 2, clitimer->date.minute);
 	fill_clitimer_time(digits + 4, clitimer->date.second);
 	memcpy(clitimer->initial_digits, digits, N_TIME_DIGITS * sizeof(int));
-
-	clitimer->date.timestr[0] = clitimer->date.hour[0] + '0';
-	clitimer->date.timestr[1] = clitimer->date.hour[1] + '0';
-	clitimer->date.timestr[2] = ':';
-	clitimer->date.timestr[3] = clitimer->date.minute[0] + '0';
-	clitimer->date.timestr[4] = clitimer->date.minute[1] + '0';
-	clitimer->date.timestr[5] = ':';
-	clitimer->date.timestr[6] = clitimer->date.second[0] + '0';
-	clitimer->date.timestr[7] = clitimer->date.second[1] + '0';
-	clitimer->date.timestr[8] = '\0';
 }
 
 int main(int argc, char **argv) {
@@ -350,19 +270,15 @@ int main(int argc, char **argv) {
 
 	/* Run cleanup on exit */
 	atexit(cleanup);
-	parse_time_arg(argv[optind]);
-
-	if (time_is_zero()) {
-		puts("Time argument is zero");
-		exit(EXIT_FAILURE);
-	}
+	initialize_time_digits(argv[optind]);
 
 	init();
 	attron(A_BLINK);
 	while (clitimer->running) {
 		draw_clock();
 		key_event();
-		if (!time_is_zero() && !clitimer->paused) {
+
+		if (!clitimer->paused) {
 			update_hour();
 		}
 	}

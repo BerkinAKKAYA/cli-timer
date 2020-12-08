@@ -24,6 +24,8 @@ install: ${BIN}
 	@mkdir -p ${INSTALLPATH}
 	@cp ${BIN} ${INSTALLPATH}
 	@chmod 0755 ${INSTALLPATH}/${BIN}
+	@echo "removing binary"
+	rm cli-timer
 	@echo "installed"
 
 uninstall:

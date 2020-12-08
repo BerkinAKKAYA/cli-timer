@@ -1,15 +1,11 @@
 # cli-timer
 
 cli-timer is a fork of [ttytimer by mbarbar][ttytimer], which is a
-fork of the [tty-clock by xorg62][tty-clock]. I added start/stop feature
-and removed the code i don't personally need, such as rebound function,
-man files, [toot][toot]... My goal was to just play with it and learn C.
-This fork does not contains any functionality you can't find in other
-forks.
+fork of the [tty-clock by xorg62][tty-clock]. Unlike tty-clock, this
+fork counts **up from zero**, instead of counting down from a number.
 
 [ttytimer]: https://github.com/mbarbar/ttytimer
 [tty-clock]: https://github.com/xorg62/tty-clock
-[toot]: https://github.com/vareille/toot
 
 ## Usage
 
@@ -47,4 +43,4 @@ make install
 
 ---
 
-> Created by Berkin AKKAYA for personal use and educational purposes.
+> Created by Berkin AKKAYA
