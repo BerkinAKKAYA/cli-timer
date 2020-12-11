@@ -283,6 +283,13 @@ int main(int argc, char **argv) {
 		}
 	}
 
+
+	printf(
+			"Session Ended in %d%d Hours, %d%d Minutes, %d%d Seconds",
+			clitimer->date.hour[0], clitimer->date.hour[1],
+			clitimer->date.minute[0], clitimer->date.minute[1],
+			clitimer->date.second[0], clitimer->date.second[1]
+	);
 	endwin();
 	return 0;
 }
