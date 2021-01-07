@@ -1,7 +1,7 @@
 # cli-timer
 
 cli-timer is a fork of [ttytimer by mbarbar][ttytimer], which is a
-fork of the [tty-clock by xorg62][tty-clock]. Unlike tty-clock, this
+fork of the [tty-clock by xorg62][tty-clock]. Unlike ttytimer, this
 fork counts **up from zero**, instead of counting down from a number.
 
 [ttytimer]: https://github.com/mbarbar/ttytimer
